@@ -4,11 +4,11 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 import os
 
-HEADER = 64  # Tamaño del encabezado para los mensajes
+HEADER = 64 
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "BYE"
-SERVER = "192.168.192.119"  # Dirección IP del servidor
+SERVER = "" #Modificarlo con la dirección IP del servidor
 ADDR = (SERVER, PORT)
 KEY_FILE = "aes_key.bin"  # Nombre del archivo que contiene la clave AES
 BLOCK_SIZE = 16  # Tamaño del bloque de AES para CBC

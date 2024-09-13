@@ -35,7 +35,7 @@ def communication(ip_port):
                     if msg == DISCONNECT_MESSAGE:
                         connected = False
 
-                    print(f"[{addr}] {msg}")
+                    print(f"\n[{addr}] {msg}")
                     broadcast(msg, conn)  # Enviar el mensaje a todos los demás clientes
             except:
                 break

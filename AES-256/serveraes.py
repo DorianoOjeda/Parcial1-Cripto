@@ -68,7 +68,7 @@ def handle_client(conn, addr, key):
                 if msg == DISCONNECT_MESSAGE:
                     connected = False
 
-                print(f"[{addr}] {msg}")
+                print(f"\n[{addr}] {msg}")
                 broadcast(msg, conn, key)  # Enviar el mensaje a todos los demás clientes
         except:
             break

@@ -7,13 +7,14 @@ import hashlib
 # Variables globales
 client_public_key = None
 server_public_key = None
-p = 227  # Modificar con el valor de p usado en el intercambio de llaves Diffie-Hellman
-g = 12   # Modificar con el valor de g usado en el intercambio de llaves Diffie-Hellman
+p = 137264501074495181280555132673901931323332164724815133317526595627537522562067022989603699054588480389773079016561323343477054349336451609284971148159280724829128531552270321268457769520042856144429883077983691811201653430137376919960068969990507421437958462547891425943025305810160065324145921753228735283903  # Número primo grande
+q = 68632250537247590640277566336950965661666082362407566658763297813768761281033511494801849527294240194886539508280661671738527174668225804642485574079640362414564265776135160634228884760021428072214941538991845905600826715068688459980034484995253710718979231273945712971512652905080032662072960876614367641951   # Subgrupo de orden q
+g = 40746562294764965373407784234554073062674073565341303353016758609344799210654104763969824808430330931109448281620048720300276969942539907157417365502013807736680793541720602226570436490901677489617911977499169334249484471027700239163555304280499401445437347279647322836086848012965178946904650279473615383579   # Generador
 shared_secret = None
 
-# Implementación del ataque de "pasos de bebé, pasos de gigante"
-def baby_step_giant_step(g, p, y):
-    m = isqrt(p) + 1
+# Implementación del ataque de "pasos de bebé, pasos de gigante" usando q
+def baby_step_giant_step(g, p, y, q):
+    m = isqrt(q) + 1
 
     # Baby step
     print("[ATAQUE] Iniciando paso de bebé:")
@@ -32,7 +33,7 @@ def baby_step_giant_step(g, p, y):
         print(f"  [PASO GIGANTE] Iteración {i}, g^-m^{i} * y [congruente] {giant_step_value} (mod {p})")
         if giant_step_value in baby_steps:
             x = i * m + baby_steps[giant_step_value]
-            print(f"  [ÉXITO] Se encontró la clave privada: x = {x}")
+            print(f"  [ÉXITO] Se encontró la clave privada: x = {x} (mod {q})")
             return x
         giant_step_value = (giant_step_value * g_inv_m) % p
 
@@ -43,7 +44,23 @@ def baby_step_giant_step(g, p, y):
 def derive_symmetric_key(shared_secret):
     shared_secret_bytes = str(shared_secret).encode('utf-8')
     symmetric_key = hashlib.sha256(shared_secret_bytes).digest()  # 32 bytes
+    print(f"[INFO] Clave simétrica derivada: {symmetric_key.hex()}")
     return symmetric_key
+
+# Función para recibir mensajes en fragmentos
+def receive_large_message(socket):
+    HEADER = 64
+    msg_length = socket.recv(HEADER).decode('utf-8').strip()
+    if msg_length:
+        msg_length = int(msg_length)
+        data = b''
+        while len(data) < msg_length:
+            packet = socket.recv(1024)
+            if not packet:
+                break
+            data += packet
+        return data
+    return None
 
 # Inicia el sniffer para capturar los paquetes de la red
 def start_sniffer():
@@ -95,15 +112,15 @@ def start_sniffer():
                         try:
                             # Interceptar las claves públicas del intercambio Diffie-Hellman
                             if client_public_key is None:
-                                client_public_key = int(payload.decode('utf-8'))
+                                client_public_key = int.from_bytes(payload[:1024], byteorder='big')
                                 print(f"[CLAVE PÚBLICA CLIENTE INTERCEPTADA]: {client_public_key}")
 
                             elif server_public_key is None:
-                                server_public_key = int(payload.decode('utf-8'))
+                                server_public_key = int.from_bytes(payload[:1024], byteorder='big')
                                 print(f"[CLAVE PÚBLICA SERVIDOR INTERCEPTADA]: {server_public_key}")
 
-                                # Inicia el ataque de "pasos de bebé, pasos de gigante"
-                                attacker_private_key = baby_step_giant_step(g, p, server_public_key)
+                                # Inicia el ataque de "pasos de bebé, pasos de gigante" usando q
+                                attacker_private_key = baby_step_giant_step(g, p, server_public_key, q)
                                 print(f"[CLAVE PRIVADA ATACANTE (CALCULADA)]: {attacker_private_key}")
 
                                 if attacker_private_key is not None:

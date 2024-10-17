@@ -9,7 +9,7 @@ from Crypto.Random import get_random_bytes
 import os
 
 HEADER = 64
-PORT = 5050
+PORT = 5051
 SERVER = "192.168.20.29"
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
@@ -129,7 +129,7 @@ def send_messages_from_server():
     while True:
         message = input("Escribe un mensaje para los clientes: ")
         if message:
-            broadcast(f"Servidor: {message}", None)
+            broadcast(f"[Servidor] {message}", None)
         if message == DISCONNECT_MESSAGE:
             break
 

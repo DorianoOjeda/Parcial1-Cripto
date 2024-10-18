@@ -18,9 +18,9 @@ clients = []
 shared_secrets = {}
 public_keys = {}
 
-p = 227  # Número primo grande
-q = 113  # Subgrupo de orden q
-g = 12   # Generador
+p = 14330819  # Número primo grande
+q = 7165409  # Subgrupo de orden q
+g = 1970788   # Generador
 
 # Generar claves Diffie-Hellman (privada y pública)
 def diffie_hellman_generate_keys(p, g, q):

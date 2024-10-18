@@ -3,6 +3,7 @@ import threading
 import random
 from Crypto.Cipher import Salsa20
 import hashlib
+import time
 
 HEADER = 64  # Tamaño del encabezado para los mensajes
 PORT = 5050
@@ -109,17 +110,27 @@ def handle_client(conn, addr):
     shared_secrets.pop(conn, None)  # Eliminar el secreto del cliente
     print(f"[Desconectado] {addr} se ha desconectado.")
 
-# Cifra usando Salsa20
-def encrypt_message(key, message):
-    cipher = Salsa20.new(key=key)
-    return cipher.nonce + cipher.encrypt(message)
 
-# Descifra usando Salsa20
+
+# Función para cifrar usando Salsa20
+def encrypt_message(key, message):
+    start_time = time.time()  
+    cipher = Salsa20.new(key=key)
+    encrypted_message = cipher.nonce + cipher.encrypt(message)
+    end_time = time.time()
+    print(f"[INFO] Tiempo de cifrado (Salsa20): {end_time - start_time} segundos")  # Mostrar tiempo de cifrado
+    return encrypted_message
+
+# Función para descifrar usando Salsa20
 def decrypt_message(key, encrypted_message):
+    start_time = time.time()
     nonce = encrypted_message[:8]
     ciphertext = encrypted_message[8:]
     cipher = Salsa20.new(key=key, nonce=nonce)
-    return cipher.decrypt(ciphertext)
+    decrypted_message = cipher.decrypt(ciphertext)
+    end_time = time.time()
+    print(f"[INFO] Tiempo de descifrado (Salsa20): {end_time - start_time} segundos")  # Mostrar tiempo de descifrado
+    return decrypted_message
 
 # Envia mensajes a todos los clientes
 def broadcast(message, current_conn):

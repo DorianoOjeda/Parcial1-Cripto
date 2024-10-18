@@ -6,7 +6,7 @@ from Crypto.Hash import SHA256
 from Crypto.Protocol.KDF import HKDF
 from Crypto.Math.Numbers import Integer
 from Crypto.Random import get_random_bytes
-import os
+import time
 
 HEADER = 64
 PORT = 5050
@@ -48,18 +48,25 @@ derived_key = HKDF(str(shared_secret).encode(), 32, b'', SHA256)  # Clave AES de
 
 # Cifrar un mensaje con AES-256-CBC
 def encrypt_message(key, message):
+    start_time = time.time() 
     iv = get_random_bytes(BLOCK_SIZE)  # Genera un vector de inicialización (IV)
     cipher = AES.new(key, AES.MODE_CBC, iv)
     padded_message = message + b' ' * (BLOCK_SIZE - len(message) % BLOCK_SIZE)  # Relleno
     ciphertext = iv + cipher.encrypt(padded_message)
+    end_time = time.time()
+    print(f"[INFO] Tiempo de cifrado (AES-256-CBC): {end_time - start_time} segundos")  # Mostrar tiempo de cifrado
     return ciphertext
 
 # Descifrar un mensaje con AES-256-CBC
 def decrypt_message(key, encrypted_message):
+    start_time = time.time()
     iv = encrypted_message[:BLOCK_SIZE]
     cipher = AES.new(key, AES.MODE_CBC, iv)
     plaintext = cipher.decrypt(encrypted_message[BLOCK_SIZE:]).rstrip(b' ')
+    end_time = time.time()
+    print(f"[INFO] Tiempo de descifrado (AES-256-CBC): {end_time - start_time} segundos")  # Mostrar tiempo de descifrado
     return plaintext
+
 
 # Recepción de mensajes del servidor
 def receive(key):

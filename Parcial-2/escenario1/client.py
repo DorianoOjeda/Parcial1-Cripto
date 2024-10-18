@@ -3,6 +3,7 @@ import threading
 from Crypto.Cipher import Salsa20
 import hashlib
 import random
+import time
 
 HEADER = 64
 PORT = 5050
@@ -81,17 +82,26 @@ def diffie_hellman_exchange():
     key = derive_symmetric_key(shared_secret)
     print(f"[INFO] Secreto compartido generado con el servidor")
 
-# Cifra usando Salsa20
+# Función para cifrar usando Salsa20
 def encrypt_message(message):
+    start_time = time.time()
     cipher = Salsa20.new(key)
-    return cipher.nonce + cipher.encrypt(message)
+    encrypted_message = cipher.nonce + cipher.encrypt(message)
+    end_time = time.time()
+    print(f"[INFO] Tiempo de cifrado (Salsa20): {end_time - start_time} segundos")  # Mostrar tiempo de cifrado
+    return encrypted_message
 
-# Descifra un mensaje usando Salsa20
+# Función para descifrar un mensaje usando Salsa20
 def decrypt_message(encrypted_message):
+    start_time = time.time()
     nonce = encrypted_message[:8]
     ciphertext = encrypted_message[8:]
     cipher = Salsa20.new(key, nonce)
-    return cipher.decrypt(ciphertext)
+    decrypted_message = cipher.decrypt(ciphertext)
+    end_time = time.time()
+    print(f"[INFO] Tiempo de descifrado (Salsa20): {end_time - start_time} segundos")  # Mostrar tiempo de descifrado
+    return decrypted_message
+
 
 # Recepción de mensajes
 def receive():

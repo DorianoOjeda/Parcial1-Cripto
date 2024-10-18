@@ -4,6 +4,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 import random
 import base64
+import time
 
 HEADER = 64
 PORT = 5050
@@ -64,13 +65,22 @@ def rsa_exchange():
 
 # Cifra un mensaje usando la clave pública del servidor
 def encrypt_message(message, server_public_key):
+    start_time = time.time()
     cipher_rsa = PKCS1_OAEP.new(server_public_key)
-    return cipher_rsa.encrypt(message.encode(FORMAT))
+    encrypted_message = cipher_rsa.encrypt(message.encode(FORMAT))
+    end_time = time.time()
+    print(f"[INFO] Tiempo de cifrado (RSA-OAEP): {end_time - start_time} segundos")  # Mostrar tiempo de cifrado
+    return encrypted_message
 
 # Descifra un mensaje usando la clave privada del cliente
 def decrypt_message(encrypted_message, private_key):
+    start_time = time.time()
     cipher_rsa = PKCS1_OAEP.new(private_key)
-    return cipher_rsa.decrypt(encrypted_message).decode(FORMAT)
+    message = cipher_rsa.decrypt(encrypted_message).decode(FORMAT)
+    end_time = time.time()
+    print(f"[INFO] Tiempo de descifrado (RSA-OAEP): {end_time - start_time} segundos")  # Mostrar tiempo de descifrado
+    return message
+
 
 # Funciones para manejar mensajes grandes
 def send_large_message(socket, message):

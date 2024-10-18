@@ -3,6 +3,7 @@ import threading
 from Crypto.PublicKey import ElGamal
 from Crypto.Random import random
 from Crypto.Hash import SHA256
+import time
 
 HEADER = 64
 PORT = 5050
@@ -30,17 +31,24 @@ def diffie_hellman_shared_secret(their_public, my_private, p):
 
 # Cifra un mensaje usando ElGamal con una clave derivada del secreto compartido
 def elgamal_encrypt(message, shared_secret, p, g):
+    start_time = time.time()
     k = random.randint(1, p-2)  # Número aleatorio para cada mensaje
     c1 = pow(g, k, p)
     hashed_secret = SHA256.new(str(shared_secret).encode(FORMAT)).digest()
     encrypted_message = bytes([_a ^ _b for _a, _b in zip(message.encode(FORMAT), hashed_secret)])
+    end_time = time.time()
+    print(f"[INFO] Tiempo de cifrado (ElGamal): {end_time - start_time} segundos")  # Mostrar tiempo de cifrado
     return (c1, encrypted_message)
 
 # Descifra un mensaje usando ElGamal
 def elgamal_decrypt(c1, encrypted_message, shared_secret, p):
+    start_time = time.time()
     hashed_secret = SHA256.new(str(shared_secret).encode(FORMAT)).digest()
     decrypted_message = bytes([_a ^ _b for _a, _b in zip(encrypted_message, hashed_secret)])
+    end_time = time.time()
+    print(f"[INFO] Tiempo de descifrado (ElGamal): {end_time - start_time} segundos")  # Mostrar tiempo de descifrado
     return decrypted_message.decode(FORMAT)
+
 
 # Intercambio de claves Diffie-Hellman
 def diffie_hellman_exchange():

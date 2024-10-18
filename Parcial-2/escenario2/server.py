@@ -6,10 +6,10 @@ from Crypto.Hash import SHA256
 from Crypto.Protocol.KDF import HKDF
 from Crypto.Math.Numbers import Integer
 from Crypto.Random import get_random_bytes
-import os
+import time 
 
 HEADER = 64
-PORT = 5051
+PORT = 5050
 SERVER = "192.168.20.29"
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
@@ -38,22 +38,30 @@ def ecdh_shared_secret(private_key, client_public_key):
     shared_point = client_point * Integer(private_key.d)
     return int(shared_point.x)
 
+
 # Cifrar un mensaje con AES-256-CBC
 def encrypt_message(key, message):
+    start_time = time.time()  
     BLOCK_SIZE = 16
     iv = get_random_bytes(BLOCK_SIZE)
     cipher = AES.new(key, AES.MODE_CBC, iv)
     padded_message = message + b' ' * (BLOCK_SIZE - len(message) % BLOCK_SIZE)
     ciphertext = iv + cipher.encrypt(padded_message)
+    end_time = time.time()  
+    print(f"[INFO] Tiempo de cifrado (AES-256-CBC): {end_time - start_time} segundos")  # Mostrar tiempo de cifrado
     return ciphertext
 
 # Descifrar un mensaje con AES-256-CBC
 def decrypt_message(key, encrypted_message):
+    start_time = time.time()  
     BLOCK_SIZE = 16
     iv = encrypted_message[:BLOCK_SIZE]
     cipher = AES.new(key, AES.MODE_CBC, iv)
     plaintext = cipher.decrypt(encrypted_message[BLOCK_SIZE:]).rstrip(b' ')
+    end_time = time.time() 
+    print(f"[INFO] Tiempo de descifrado (AES-256-CBC): {end_time - start_time} segundos")  # Mostrar tiempo de descifrado
     return plaintext
+
 
 # Manejar la comunicación con los clientes
 def handle_client(conn, addr):
